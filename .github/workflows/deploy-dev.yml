@@ -26,15 +26,15 @@ jobs:
     name: Deploy Web Apps
     runs-on: ubuntu-latest
     steps:
-      - name: Authorize Git
-        run: |
-          git config user.name magna-bot
-          git config user.email github-actions@github.com
-
       - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
+      - name: Authorize Git
+        run: |
+          git config user.name magna-bot
+          git config user.email github-actions@github.com
 
       - name: Setup node
         uses: actions/setup-node@v3
