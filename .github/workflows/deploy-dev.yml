@@ -36,12 +36,6 @@ jobs:
           git config user.name magna-bot
           git config user.email github-actions@github.com
 
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          cache: yarn
-          node-version: '18.15.0'
-
       - name: Add change to release
         uses: release-drafter/release-drafter@v5
         id: release
