@@ -25,5 +25,6 @@ jobs:
             const branch = await github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: `refs/heads/release/${{ github.event.release.name }}`
+              ref: `refs/heads/release/${{ github.event.release.name }}`,
+              sha: context.sha
             });
