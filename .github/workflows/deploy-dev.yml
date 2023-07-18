@@ -23,6 +23,11 @@ env:
 
 jobs:
   deploy:
+    permissions:
+      # write permission is required to create a github release
+      contents: write
+      pull-requests: read
+
     name: Deploy Web Apps
     runs-on: ubuntu-latest
     steps:
