@@ -1,0 +1,44 @@
+on:
+  push:
+    branches:
+      - dev
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: dev-magna-apps
+  cancel-in-progress: true
+
+name: Deploy Magna Web to Dev
+
+env:
+  CI: true
+  STAGE: dev
+  REGION: ${{ secrets.DEV_AWS_REGION }}
+  AWS_ACCOUNT_ID: ${{ secrets.DEV_ACCOUNT_ID }}
+  DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+  DATABASE_URI: dummy
+
+jobs:
+  deploy:
+    name: Deploy Web Apps
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Authorize Git
+        run: |
+          git config user.name magna-bot
+          git config user.email github-actions@github.com
+
+      - name: Add change to release
+        uses: release-drafter/release-drafter@v5
+        id: release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
