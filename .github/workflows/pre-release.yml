@@ -1,0 +1,29 @@
+on:
+  release:
+    types:
+      - prereleased
+
+name: Create a Release branch
+
+jobs:
+  create-release-branch:
+    name: Create release branch
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Print Github Context
+        run: echo "$GITHUB_CONTEXT"
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+
+      - name: Create branch
+        uses: actions/github-script@v6
+        with:
+          script: |
+            console.log(context);
+            
+            const branch = await github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `refs/heads/release/${{ github.event.release.name }}`
+            });
