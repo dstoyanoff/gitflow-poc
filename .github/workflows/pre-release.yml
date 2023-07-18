@@ -3,7 +3,7 @@ on:
     types:
       - prereleased
 
-name: Create a Release branch
+name: Pre-release
 
 jobs:
   create-release-branch:
@@ -20,8 +20,6 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            console.log(context);
-            
             const branch = await github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,

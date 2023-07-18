@@ -1,0 +1,31 @@
+on:
+  push:
+    branches:
+      - release/*
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+name: Push to Release
+
+jobs:
+  update-release:
+    name: Update release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Authorize Git
+        run: |
+          git config user.name magna-bot
+          git config user.email github-actions@github.com
+      - name: Add change to release
+        uses: release-drafter/release-drafter@v5
+        id: release
+        with:
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

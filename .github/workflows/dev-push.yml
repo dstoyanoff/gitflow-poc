@@ -1,0 +1,38 @@
+on:
+  push:
+    branches:
+      - dev
+
+permissions:
+  # write permission is required to create a github release
+  contents: write
+  actions: write
+  pull-requests: read
+
+concurrency:
+  group: dev
+  cancel-in-progress: true
+
+name: Push to Dev
+
+jobs:
+  update-release:
+    name: Update release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Authorize Git
+        run: |
+          git config user.name magna-bot
+          git config user.email github-actions@github.com
+      - name: Add change to release
+        uses: release-drafter/release-drafter@v5
+        id: release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy:
+    name: Deploy Web Apps
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
