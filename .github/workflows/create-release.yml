@@ -13,11 +13,6 @@ jobs:
     name: Create Release
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          ref: refs/heads/dev
-
       - name: Find previous release
         id: prev_release
         uses: actions/github-script@v6
@@ -54,8 +49,6 @@ jobs:
         with:
           script: |
             const version = JSON.parse(process.env.VERSION);
-            
-            console.log(context);
             
             await github.rest.git.createRef({
               owner: context.repo.owner,

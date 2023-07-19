@@ -1,15 +1,15 @@
 changelog:
   categories:
-    - title: Features 🎉
+    - title: 🎉 Features
       labels:
         - feature
-    - title: Fixes 🪲
+    - title: 🪲 Fixes
       labels:
         - fix
-    - title: Chores 🧳
+    - title: 🧳 Chores
       labels:
         - chore
 
-    - title: Others ➕
+    - title: ➕ Others
       labels:
-        - *
+        - "*"
