@@ -1,0 +1,15 @@
+changelog:
+  categories:
+    - title: Features 🎉
+      labels:
+        - feature
+    - title: Fixes 🪲
+      labels:
+        - fix
+    - title: Chores 🧳
+      labels:
+        - chore
+
+    - title: Others ➕
+      labels:
+        - *

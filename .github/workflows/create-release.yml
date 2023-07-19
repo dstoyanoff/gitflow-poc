@@ -1,0 +1,106 @@
+on:
+  workflow_dispatch:
+    inputs:
+      major:
+        type: boolean
+        description: Is this a major release?
+        default: false
+
+name: Create Release
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: refs/heads/dev
+
+      - name: Find previous release
+        id: prev_release
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const release = await github.rest.repos.getLatestRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            
+            return release.data.name;
+
+      - name: Calculate release version
+        id: version
+        uses: actions/github-script@v6
+        env:
+          PREV_RELEASE: ${{ steps.prev_release.outputs.result }}
+        with:
+          script: |
+            const prevRelease = JSON.parse(process.env.PREV_RELEASE);
+            const isMajorVersion = JSON.parse(context.payload.inputs.major);
+    
+            const [major, minor] = prevRelease.substring(1).split(".").map(Number);
+            
+            const newMajor = isMajorVersion ? major + 1 : major;
+            const newMinor = isMajorVersion ? 0 : minor + 1;
+
+            return `v${newMajor}.${newMinor}.0`;
+
+      - name: Create release branch
+        uses: actions/github-script@v6
+        env:
+          VERSION: ${{ steps.version.outputs.result }}
+        with:
+          script: |
+            const version = JSON.parse(process.env.VERSION);
+            
+            console.log(context);
+            
+            await github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `refs/heads/release/${version}`,
+              sha: context.sha
+            });
+
+      - name: Generate release notes
+        id: release_notes
+        uses: actions/github-script@v6
+        env:
+          VERSION: ${{ steps.version.outputs.result }}
+          PREV_RELEASE: ${{ steps.prev_release.outputs.result }}
+        with:
+          script: |
+            const version = JSON.parse(process.env.VERSION);
+            const prevRelease = JSON.parse(process.env.PREV_RELEASE);
+            
+            const releaseNotes = await github.rest.repos.generateReleaseNotes({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: version,
+              target_commitish: `release/${version}`,
+              previous_tag_name: prevRelease
+            });
+            
+            return releaseNotes.data.body
+
+      - name: Create GitHub release
+        uses: actions/github-script@v6
+        env:
+          VERSION: ${{ steps.version.outputs.result }}
+          RELEASE_NOTES: ${{ steps.release_notes.outputs.result }}
+        with:
+          script: |
+            const version = JSON.parse(process.env.VERSION);
+            const releaseNotes = JSON.parse(process.env.RELEASE_NOTES);
+
+            const release = await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: version,
+              name: version,
+              draft: true,
+              target_commitish: `release/${version}`,
+              body: releaseNotes
+            });
