@@ -1,0 +1,15 @@
+name: GitFlow
+description: Magna's GitFlow implementation
+author: Magna Inc
+inputs:
+  operation:
+    required: true
+    description: Which operation of the action is getting triggered? One of create_release | update_release | publish_release
+  major:
+    description: Is this a major version release?
+    default: "false"
+  cycle:
+    description: Which cycle is the release for?
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
