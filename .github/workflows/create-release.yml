@@ -21,7 +21,7 @@ jobs:
       - uses: actions/setup-node@v3
       - name: Build action
         working-directory: action
-        run: yarn build
+        run: yarn && yarn build
       - name: Create Release
         uses: ./action
         with:
