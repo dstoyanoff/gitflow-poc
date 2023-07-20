@@ -1,0 +1,20 @@
+on:
+  workflow_dispatch:
+
+name: Publish Release
+
+jobs:
+  publish-release:
+    name: Publish Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+      - name: Build action
+        working-directory: action
+        run: yarn build
+      - name: Publish Release
+        uses: ./action
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          operation: publish_release

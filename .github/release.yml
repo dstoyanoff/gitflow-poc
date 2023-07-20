@@ -10,6 +10,6 @@ changelog:
       labels:
         - chore
 
-    - title: ➕ Others
+    - title: 💎 Others
       labels:
         - "*"
