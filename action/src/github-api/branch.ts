@@ -32,7 +32,10 @@ export const lockReleaseBranch = async (version: string) => {
   });
 };
 
-export const mergeReleaseToMain = async (version: string) => {
+export const mergeReleaseToMain = async (
+  version: string,
+  releaseNotes: string
+) => {
   core.info(`Merging branch release/${version} to main`);
 
   return getOctokit().repos.merge({
@@ -40,6 +43,6 @@ export const mergeReleaseToMain = async (version: string) => {
     repo: github.context.repo.repo,
     base: "main",
     head: `release/${version}`,
-    commit_message: `Release ${version}`,
+    commit_message: `Release ${version}\n${releaseNotes}`,
   });
 };
