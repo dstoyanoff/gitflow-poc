@@ -3,6 +3,7 @@ import { getOperation } from "./utils/inputs";
 import { createRelease } from "./create-release";
 import { updateRelease } from "./update-release";
 import { publishRelease } from "./publish-release";
+import { createHotfixRelease } from "./hotfix-release";
 
 const run = async () => {
   try {
@@ -18,6 +19,10 @@ const run = async () => {
 
     if (operation === "publish_release") {
       return publishRelease();
+    }
+
+    if (operation === "hotfix_release") {
+      return createHotfixRelease();
     }
   } catch (error) {
     core.setFailed((error as Error).message);

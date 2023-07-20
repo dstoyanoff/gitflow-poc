@@ -1,0 +1,27 @@
+name: Hotfix Release
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
+jobs:
+  create-hotfix-release:
+    name: Create Hotfix Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18.15.0'
+      - name: Build action
+        if: ${{ !env.ACT }}
+        working-directory: action
+        run: yarn && yarn build
+      - name: Create Hotfix Release
+        uses: ./action
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          operation: hotfix_release

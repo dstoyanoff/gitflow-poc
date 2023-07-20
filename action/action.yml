@@ -7,7 +7,7 @@ inputs:
     description: GitHub token
   operation:
     required: true
-    description: Which operation of the action is getting triggered? One of create_release | update_release | publish_release
+    description: Which operation of the action is getting triggered? One of create_release | update_release | publish_release | hotfix_release
   major:
     description: Is this a major version release?
     default: "false"
