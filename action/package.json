@@ -12,10 +12,12 @@
     "@octokit/core": "^5.0.0",
     "@octokit/request-error": "^5.0.0",
     "@octokit/rest": "^20.0.1",
-    "@octokit/types": "^11.1.0"
+    "@octokit/types": "^11.1.0",
+    "node-fetch": "^2.6.12"
   },
   "devDependencies": {
     "@types/node": "^20.4.2",
+    "@types/node-fetch": "^2.6.4",
     "tsup": "^7.1.0",
     "typescript": "^5.1.6"
   },
