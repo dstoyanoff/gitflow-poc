@@ -43,6 +43,6 @@ export const mergeReleaseToMain = async (
     repo: github.context.repo.repo,
     base: "main",
     head: `release/${version}`,
-    commit_message: `Release ${version}\n${releaseNotes}`,
+    commit_message: `(chore) Release ${version}\n${releaseNotes}`,
   });
 };

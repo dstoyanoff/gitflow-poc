@@ -7,20 +7,32 @@ export const createReleaseToDevPr = async (
   releaseNotes: string
 ) => {
   core.info(`Creating a release/${version} to dev Pull Request`);
-  const { data: result } = await getOctokit().pulls.create({
-    owner: github.context.repo.owner,
-    repo: github.context.repo.repo,
-    base: "dev",
-    head: `release/${version}`,
-    body: releaseNotes,
-    title: `chore(release): Merge release ${version} to dev`,
-  });
+  try {
+    const { data: result } = await getOctokit().pulls.create({
+      owner: github.context.repo.owner,
+      repo: github.context.repo.repo,
+      base: "dev",
+      head: `release/${version}`,
+      body: releaseNotes,
+      title: `chore(release): Merge release ${version} to dev`,
+    });
 
-  core.info("Adding a chore label to the Pull Request");
-  return getOctokit().issues.addLabels({
-    owner: github.context.repo.owner,
-    repo: github.context.repo.repo,
-    issue_number: result.number,
-    labels: ["chore"],
-  });
+    core.info("Adding a chore label to the Pull Request");
+    return getOctokit().issues.addLabels({
+      owner: github.context.repo.owner,
+      repo: github.context.repo.repo,
+      issue_number: result.number,
+      labels: ["chore"],
+    });
+  } catch (error) {
+    if (
+      (error as Error).message ===
+      `No commits between dev and release/${version}`
+    ) {
+      // this is a no-op
+      return;
+    }
+
+    throw error;
+  }
 };
