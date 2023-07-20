@@ -26,9 +26,12 @@ export const createReleaseToDevPr = async (
     });
   } catch (error) {
     if (
-      (error as Error).message ===
+      (error as any).response.data.errors[0].message ===
       `No commits between dev and release/${version}`
     ) {
+      core.info(
+        "No Pull Request created since the release branch does not contain any commits on top of dev"
+      );
       // this is a no-op
       return;
     }
