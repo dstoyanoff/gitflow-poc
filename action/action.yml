@@ -2,6 +2,9 @@ name: GitFlow
 description: Magna's GitFlow implementation
 author: Magna Inc
 inputs:
+  token:
+    required: true
+    description: GitHub token
   operation:
     required: true
     description: Which operation of the action is getting triggered? One of create_release | update_release | publish_release
