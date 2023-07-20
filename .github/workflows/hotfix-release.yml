@@ -1,3 +1,5 @@
+name: Hotfix Release
+
 on:
   pull_request:
     branches:
