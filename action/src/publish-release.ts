@@ -12,7 +12,7 @@ export const publishRelease = async () => {
   }
 
   await publishDraftRelease(release.id);
-  await mergeReleaseToMain(release.tag_name);
+  await mergeReleaseToMain(release.tag_name, release.body ?? "");
   // await lockReleaseBranch(release.tag_name); // TODO: this is not supported in a free private repo, so should be tested later
   await createReleaseToDevPr(release.tag_name, release.body ?? "");
 };

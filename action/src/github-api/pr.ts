@@ -20,7 +20,7 @@ export const createReleaseToDevPr = async (
   return getOctokit().issues.addLabels({
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
-    issue_number: result.id,
+    issue_number: result.number,
     labels: ["chore"],
   });
 };
