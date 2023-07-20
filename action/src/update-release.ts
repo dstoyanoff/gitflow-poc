@@ -1,5 +1,9 @@
 import * as github from "@actions/github";
-import { getDraftRelease, updateDraftRelease } from "./github-api/release";
+import {
+  generateReleaseNotes,
+  getDraftRelease,
+  updateDraftRelease,
+} from "./github-api/release";
 import {
   extractBranchFromRef,
   extractReleaseVersionFromRef,
@@ -8,7 +12,6 @@ import {
 export const updateRelease = async () => {
   const version = extractReleaseVersionFromRef(github.context.ref);
   const branch = extractBranchFromRef(github.context.ref);
-
   const release = await getDraftRelease();
 
   if (!release) {
@@ -17,5 +20,7 @@ export const updateRelease = async () => {
     );
   }
 
-  await updateDraftRelease(release.id, version, branch);
+  const releaseNotes = await generateReleaseNotes(version, branch);
+
+  await updateDraftRelease(release.id, version, branch, releaseNotes);
 };

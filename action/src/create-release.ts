@@ -2,6 +2,7 @@ import * as core from "@actions/core";
 import { getCycle, getIsMajor } from "./utils/inputs";
 import {
   createDraftRelease,
+  generateReleaseNotes,
   getDraftRelease,
   getLatestReleaseVersion,
 } from "./github-api/release";
@@ -15,10 +16,10 @@ export const createRelease = async () => {
   }
 
   const version = await calculateReleaseVersion();
-
   const branch = await createReleaseBranch(version);
+  const releaseNotes = await generateReleaseNotes(version, branch);
 
-  await createDraftRelease(version, branch, getCycle());
+  await createDraftRelease(version, branch, getCycle(), releaseNotes);
 };
 
 const calculateReleaseVersion = async () => {
@@ -37,7 +38,7 @@ const calculateReleaseVersion = async () => {
 
   const newVersion = `v${newMajor}.${newMinor}.0`;
 
-  core.info(`Calculated new version - ${newVersion}`);
+  core.info(`Calculated release version - ${newVersion}`);
 
   return newVersion;
 };

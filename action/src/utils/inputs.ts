@@ -16,7 +16,7 @@ export const getOperation = () => {
 
   if (!operation) {
     throw new Error(
-      "<operation> input not provided. Please set to one of: create_release | update_release | publish_release"
+      "<operation> input not provided. Please set to one of: create_release | update_release | publish_release | hotfix_release"
     );
   }
 

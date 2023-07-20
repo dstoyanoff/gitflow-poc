@@ -41,10 +41,10 @@ export const getLatestReleaseVersion = async () => {
 
 export const generateReleaseNotes = async (
   version: string,
-  releaseBranch: string
+  targetBranch: string
 ) => {
   core.info(
-    `Generating release notes for ${version} (branch: ${releaseBranch})`
+    `Generating release notes for ${version} (branch: ${targetBranch})`
   );
 
   const latestRelease = await getLatestReleaseVersion();
@@ -53,7 +53,7 @@ export const generateReleaseNotes = async (
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
     tag_name: version,
-    target_commitish: releaseBranch,
+    target_commitish: targetBranch,
     ...(latestRelease && {
       previous_tag_name: latestRelease,
     }),
@@ -62,16 +62,15 @@ export const generateReleaseNotes = async (
   return result.body;
 };
 
-export const createDraftRelease = async (
+export const createDraftRelease = (
   version: string,
   releaseBranch: string,
-  cycle: number
+  cycle: number,
+  releaseNotes: string
 ) => {
   core.info(
     `Creating draft release ${version} (branch: ${releaseBranch}, cycle: ${cycle})`
   );
-
-  const releaseNotes = await generateReleaseNotes(version, releaseBranch);
 
   return getOctokit().repos.createRelease({
     owner: github.context.repo.owner,
@@ -84,16 +83,15 @@ export const createDraftRelease = async (
   });
 };
 
-export const updateDraftRelease = async (
+export const updateDraftRelease = (
   releaseId: number,
   version: string,
-  releaseBranch: string
+  releaseBranch: string,
+  releaseNotes: string
 ) => {
   core.info(
     `Updating draft release ${releaseId} (version: ${version}, branch: ${releaseBranch})`
   );
-
-  const releaseNotes = await generateReleaseNotes(version, releaseBranch);
 
   return getOctokit().repos.updateRelease({
     owner: github.context.repo.owner,
@@ -112,5 +110,21 @@ export const publishDraftRelease = async (releaseId: number) => {
     repo: github.context.repo.repo,
     release_id: releaseId,
     draft: false,
+  });
+};
+
+export const publishHotfixRelease = async (
+  version: string,
+  releaseNotes: string
+) => {
+  core.info(`Publishing a hotfix release ${version}`);
+
+  return getOctokit().repos.createRelease({
+    owner: github.context.repo.owner,
+    repo: github.context.repo.repo,
+    tag_name: version,
+    target_commitish: "main",
+    name: `Hotfix ${version}`,
+    body: releaseNotes,
   });
 };

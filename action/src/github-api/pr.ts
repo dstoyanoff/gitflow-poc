@@ -10,6 +10,7 @@ export const createReleaseToDevPr = async (
   releaseNotes: string
 ) => {
   core.info(`Creating a release/${version} to dev Pull Request`);
+
   try {
     const { data: result } = await getOctokit().pulls.create({
       owner: github.context.repo.owner,
@@ -45,4 +46,17 @@ export const createReleaseToDevPr = async (
 
     throw error;
   }
+};
+
+export const createHotfixToDevPr = (branch: string, releaseNotes: string) => {
+  core.info(`Creating a hotfix to dev Pull Request`);
+
+  return getOctokit().pulls.create({
+    owner: github.context.repo.owner,
+    repo: github.context.repo.repo,
+    base: "dev",
+    head: branch,
+    body: releaseNotes,
+    title: `chore(hotfix): Merge hotfix to dev`,
+  });
 };
