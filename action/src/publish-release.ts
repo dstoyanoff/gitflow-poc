@@ -1,5 +1,5 @@
 import { getDraftRelease, publishDraftRelease } from "./github-api/release";
-import { lockReleaseBranch, mergeReleaseToMain } from "./github-api/branch";
+import { mergeReleaseToMain } from "./github-api/branch";
 import { createReleaseToDevPr } from "./github-api/pr";
 
 export const publishRelease = async () => {
@@ -13,6 +13,6 @@ export const publishRelease = async () => {
 
   await publishDraftRelease(release.id);
   await mergeReleaseToMain(release.tag_name);
-  await lockReleaseBranch(release.tag_name);
+  // await lockReleaseBranch(release.tag_name); // TODO: this is not supported in a free private repo, so should be tested later
   await createReleaseToDevPr(release.tag_name, release.body ?? "");
 };
