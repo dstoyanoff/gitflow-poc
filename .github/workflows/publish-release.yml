@@ -10,6 +10,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
+        with:
+          node-version: '18.15.0'
       - name: Build action
         working-directory: action
         run: yarn && yarn build
