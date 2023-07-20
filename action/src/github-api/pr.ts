@@ -1,6 +1,9 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
 import { getOctokit } from "../utils/octokit";
+import { RequestError } from "@octokit/request-error";
+import { OctokitResponse } from "@octokit/types";
+import { ErrorResponseData } from "../types";
 
 export const createReleaseToDevPr = async (
   version: string,
@@ -25,9 +28,13 @@ export const createReleaseToDevPr = async (
       labels: ["chore"],
     });
   } catch (error) {
+    if (!(error instanceof RequestError)) {
+      throw error;
+    }
+
     if (
-      (error as any).response.data.errors[0].message ===
-      `No commits between dev and release/${version}`
+      (error.response as OctokitResponse<ErrorResponseData>)?.data?.errors?.[0]
+        .message === `No commits between dev and release/${version}`
     ) {
       core.info(
         "No Pull Request created since the release branch does not contain any commits on top of dev"
