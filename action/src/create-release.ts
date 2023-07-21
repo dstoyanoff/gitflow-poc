@@ -6,7 +6,7 @@ import {
   getDraftRelease,
   getLatestReleaseVersion,
 } from "./github-api/release";
-import { createBranch } from "./github-api/branch";
+import { createBranch, updateBranchProtection } from "./github-api/branch";
 
 export const createRelease = async () => {
   const existingDraft = await getDraftRelease();
@@ -20,6 +20,12 @@ export const createRelease = async () => {
   const branchName = `release/${version}`;
 
   await createBranch(branchName);
+
+  await updateBranchProtection(branchName, {
+    requiredApprovals: 2,
+    requireCodeOwnerReviews: true,
+    lockBranch: false,
+  });
 
   const releaseNotes = await generateReleaseNotes(
     version,

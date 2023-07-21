@@ -11,31 +11,43 @@ export const createBranch = async (branchName: string, sha?: string) => {
   const shaFrom = sha ?? github.context.sha;
   core.info(`Creating branch ${branchName} from ${shaFrom}`);
 
-  const {} = await getOctokit().git.createRef({
+  const { data: result } = await getOctokit().git.createRef({
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
     ref: `refs/heads/${branchName}`,
     sha: shaFrom,
   });
+
+  return result;
 };
 
 /**
- * Updates the branch protection of a branch so the branch is marked as locked (read-only)
+ * Updates the branch protection rules to ensure we follow the rules
  * @param branch name of the branch
+ * @param options protection options
  */
-export const lockBranch = async (branch: string) => {
-  core.info(`Marking branch ${branch} as locked`);
-
+export const updateBranchProtection = async (
+  branch: string,
+  options: {
+    lockBranch?: boolean;
+    requiredApprovals?: number;
+    requireCodeOwnerReviews?: boolean;
+  }
+) => {
   return getOctokit().repos.updateBranchProtection({
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
     branch,
-    lock_branch: true,
-
-    // required by the API
+    lock_branch: options.lockBranch,
     required_status_checks: null,
     enforce_admins: null,
-    required_pull_request_reviews: null,
+    required_pull_request_reviews: {
+      required_approving_review_count: options.requiredApprovals,
+      require_code_owner_reviews: options.requireCodeOwnerReviews,
+      bypass_pull_request_allowances: {
+        apps: ["github-actions"],
+      },
+    },
     restrictions: null,
   });
 };
