@@ -60,3 +60,15 @@ export const createHotfixToDevPr = (branch: string, releaseNotes: string) => {
     title: `chore(hotfix): Merge hotfix to dev`,
   });
 };
+
+export const getCommits = async (prNumber: number) => {
+  core.info(`Retrieving PR commits for #${prNumber}`);
+
+  const { data: result } = await getOctokit().pulls.listCommits({
+    owner: github.context.repo.owner,
+    repo: github.context.repo.repo,
+    pull_number: prNumber,
+  });
+
+  return result;
+};
