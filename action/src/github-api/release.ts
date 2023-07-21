@@ -124,7 +124,7 @@ export const publishHotfixRelease = async (
     repo: github.context.repo.repo,
     tag_name: version,
     target_commitish: "main",
-    name: `Hotfix ${version}`,
+    name: `Release ${version} - Hotfix`,
     body: releaseNotes,
   });
 };
