@@ -17,7 +17,7 @@ export const createRelease = async () => {
 
   const latestRelease = await getLatestReleaseVersion();
   const version = await calculateReleaseVersion(latestRelease);
-  const branchName = `release/${version};`;
+  const branchName = `release/${version}`;
 
   await createBranch(branchName);
 
