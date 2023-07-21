@@ -21,7 +21,6 @@ jobs:
         working-directory: action
         run: yarn && yarn build
       - name: Create Hotfix Release
-        if: ${{ github.event.pull_request.merged == 'true' }}
         uses: ./action
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
