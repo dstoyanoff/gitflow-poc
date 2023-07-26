@@ -40,69 +40,66 @@ export const getLatestReleaseVersion = async () => {
 };
 
 export const generateReleaseNotes = async (
-  version: string,
-  targetBranch: string
+  tag: string,
+  targetBranch: string,
+  previousTag?: string | null
 ) => {
-  core.info(
-    `Generating release notes for ${version} (branch: ${targetBranch})`
-  );
-
-  const latestRelease = await getLatestReleaseVersion();
+  core.info(`Generating release notes for ${tag} (branch: ${targetBranch})`);
 
   const { data: result } = await getOctokit().repos.generateReleaseNotes({
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
-    tag_name: version,
+    tag_name: tag,
     target_commitish: targetBranch,
-    ...(latestRelease && {
-      previous_tag_name: latestRelease,
+    ...(previousTag && {
+      previous_tag_name: previousTag,
     }),
   });
 
   return result.body;
 };
 
-export const createDraftRelease = (
-  version: string,
-  releaseBranch: string,
-  cycle: number,
-  releaseNotes: string
+export const createRelease = (
+  tagName: string,
+  targetBranch: string,
+  name: string,
+  releaseNotes: string,
+  draft: boolean
 ) => {
   core.info(
-    `Creating draft release ${version} (branch: ${releaseBranch}, cycle: ${cycle})`
+    `Creating draft release ${name} (branch: ${targetBranch}, tag: ${tagName})`
   );
 
   return getOctokit().repos.createRelease({
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
-    tag_name: version,
-    target_commitish: releaseBranch,
-    name: `Release ${version} - Cycle ${cycle}`,
-    draft: true,
+    tag_name: tagName,
+    target_commitish: targetBranch,
+    name,
+    draft,
     body: releaseNotes,
   });
 };
 
-export const updateDraftRelease = (
+export const updateRelease = (
   releaseId: number,
-  version: string,
-  releaseBranch: string,
-  releaseNotes: string
+  tagName: string,
+  releaseNotes: string,
+  draft: boolean
 ) => {
-  core.info(
-    `Updating draft release ${releaseId} (version: ${version}, branch: ${releaseBranch})`
-  );
+  core.info(`Updating release ${releaseId} (tag: ${tagName})`);
 
   return getOctokit().repos.updateRelease({
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
-    tag_name: version,
+    tag_name: tagName,
     release_id: releaseId,
+    draft,
     body: releaseNotes,
   });
 };
 
-export const publishDraftRelease = async (releaseId: number) => {
+export const publishRelease = async (releaseId: number) => {
   core.info(`Publishing draft release ${releaseId}`);
 
   return getOctokit().repos.updateRelease({
@@ -110,21 +107,5 @@ export const publishDraftRelease = async (releaseId: number) => {
     repo: github.context.repo.repo,
     release_id: releaseId,
     draft: false,
-  });
-};
-
-export const publishHotfixRelease = async (
-  version: string,
-  releaseNotes: string
-) => {
-  core.info(`Publishing a hotfix release ${version}`);
-
-  return getOctokit().repos.createRelease({
-    owner: github.context.repo.owner,
-    repo: github.context.repo.repo,
-    tag_name: version,
-    target_commitish: "main",
-    name: `Release ${version} - Hotfix`,
-    body: releaseNotes,
   });
 };
