@@ -7,14 +7,12 @@ import {
 } from "./github-api/branch";
 import * as core from "@actions/core";
 import { createCommit, getCommit } from "./github-api/commit";
-import { createPullRequest, getPullRequestsByCommit } from "./github-api/pr";
-import { extractBranchFromRef } from "./utils/ref";
+import { createPullRequest } from "./github-api/pr";
 
 export async function updateRelease() {
   const commit = await getCommit(github.context.sha);
-  const pr = await getPr();
 
-  const choreBranchName = `chore/hotfix-merge-${pr.number}`;
+  const choreBranchName = `chore/release-back-merge-${commit.sha}`;
   const newBranch = await createChoreBranch(choreBranchName, commit.sha);
 
   if (!newBranch) {
@@ -42,26 +40,14 @@ export async function updateRelease() {
 
   await updateBranchSha(choreBranchName, cherry.sha);
 
+  const [title] = commit.message.split("\n");
+
   await createPullRequest(
     choreBranchName,
     "dev",
-    `chore(release): Merge release fix ${pr.number} to dev`,
-    pr.body ?? commit.message
+    `chore(release): Release fix [${title}] to dev`,
+    commit.message
   );
-}
-
-async function getPr() {
-  const prs = await getPullRequestsByCommit(github.context.sha);
-
-  const pr = prs.find(
-    (pr) => pr.base.ref === extractBranchFromRef(github.context.ref)
-  );
-
-  if (!pr) {
-    throw new Error(`Could not find PR for ref ${github.context.ref}`);
-  }
-
-  return pr;
 }
 
 async function createChoreBranch(name: string, fixCommitSha: string) {
