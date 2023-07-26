@@ -25,5 +25,5 @@ jobs:
       - name: Update Release
         uses: ./action
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.ACTIONS_TOKEN }}
           operation: update_release
