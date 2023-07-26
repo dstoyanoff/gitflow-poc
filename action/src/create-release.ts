@@ -1,11 +1,12 @@
 import * as core from "@actions/core";
-import { getIsMajor } from "./utils/inputs";
+import { getCycle, getIsMajor } from "./utils/inputs";
 import { getLatestReleaseVersion } from "./github-api/release";
 import {
   createBranch,
   getBranch,
   updateBranchProtection,
 } from "./github-api/branch";
+import { createPullRequest } from "./github-api/pr";
 
 export const createRelease = async () => {
   const latestRelease = await getLatestReleaseVersion();
@@ -28,6 +29,13 @@ export const createRelease = async () => {
     linearHistory: true,
     // TODO(improve): require merge queue here once the GitHub API supports it
   });
+
+  await createPullRequest(
+    branchName,
+    "main",
+    `chore(release): Release ${version} - Cycle ${getCycle()}`,
+    `Release ${version} - Cycle ${getCycle()}`
+  );
 };
 
 const calculateReleaseVersion = async (latestRelease: string | null) => {
