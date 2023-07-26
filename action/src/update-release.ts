@@ -7,23 +7,16 @@ import {
 } from "./github-api/branch";
 import * as core from "@actions/core";
 import { createCommit, getCommit } from "./github-api/commit";
-import { createPullRequest, getPullRequestByCommit } from "./github-api/pr";
+import { createPullRequest } from "./github-api/pr";
 
-export const updateRelease = async () => {
-  const pr = await getPullRequestByCommit(github.context.sha);
-  const choreBranchName = `chore/hotfix-merge-${pr.number}`;
+export async function updateRelease() {
+  const commit = await getCommit(github.context.sha);
 
-  const devBranch = await getBranch("dev");
-
-  if (!devBranch) {
-    throw new Error("Dev branch not resolved");
-  }
-
-  await createBranch(choreBranchName, devBranch.commit.sha);
-  const newBranch = await getBranch(choreBranchName);
+  const choreBranchName = `chore/release-back-merge-${commit.sha}`;
+  const newBranch = await createChoreBranch(choreBranchName, commit.sha);
 
   if (!newBranch) {
-    throw new Error(`Branch ${choreBranchName} not resolved`);
+    return;
   }
 
   const branchSha = newBranch.commit.sha;
@@ -32,7 +25,7 @@ export const updateRelease = async () => {
     `Created branch ${choreBranchName} (sha: ${branchSha}, tree: ${branchTree})`
   );
 
-  const commit = await getCommit(github.context.sha);
+  console.dir(commit.parents, { depth: null });
   const parentSha = commit.parents[0].sha;
   const tempCommit = await createCommit(branchTree, parentSha, "temp");
 
@@ -47,16 +40,30 @@ export const updateRelease = async () => {
 
   await updateBranchSha(choreBranchName, cherry.sha);
 
-  // when creating the release PR, the push gets triggered,
-  // but at that point we should not create a dev PR as there is no commit difference
-  if (devBranch.commit.sha === commit.sha) {
-    return;
-  }
+  const [title] = commit.message.split("\n");
 
   await createPullRequest(
     choreBranchName,
     "dev",
-    `chore(release): Merge release fix ${pr.number} to dev`,
-    pr.body ?? commit.message
+    `chore(release): Release fix [${title}] to dev`,
+    commit.message
   );
-};
+}
+
+async function createChoreBranch(name: string, fixCommitSha: string) {
+  const devBranch = await getBranch("dev");
+
+  if (!devBranch) {
+    throw new Error("Dev branch not resolved");
+  }
+
+  // when creating the release PR, the push gets triggered,
+  // but at that point we should not create a dev PR as there is no commit difference
+  if (devBranch.commit.sha === fixCommitSha) {
+    core.info("No diff to dev, so no PR will be opened");
+    return null;
+  }
+
+  await createBranch(name, devBranch.commit.sha);
+  return getBranch(name);
+}
