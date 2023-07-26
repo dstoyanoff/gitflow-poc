@@ -48,20 +48,25 @@ export const createReleaseToDevPr = async (
   }
 };
 
-export const createHotfixToDevPr = (branch: string, releaseNotes: string) => {
+export const createPullRequest = (
+  from: string,
+  to: string,
+  title: string,
+  body: string
+) => {
   core.info(`Creating a hotfix to dev Pull Request`);
 
   return getOctokit().pulls.create({
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
-    base: "dev",
-    head: branch,
-    body: releaseNotes,
-    title: `chore(hotfix): Merge hotfix to dev`,
+    base: to,
+    head: from,
+    body,
+    title,
   });
 };
 
-export const getCommits = async (prNumber: number) => {
+export const getPullRequestCommits = async (prNumber: number) => {
   core.info(`Retrieving PR commits for #${prNumber}`);
 
   const { data: result } = await getOctokit().pulls.listCommits({

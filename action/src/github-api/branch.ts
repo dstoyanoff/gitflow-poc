@@ -32,6 +32,7 @@ export const updateBranchProtection = async (
     lockBranch?: boolean;
     requiredApprovals?: number;
     requireCodeOwnerReviews?: boolean;
+    linearHistory?: boolean;
   }
 ) => {
   return getOctokit().repos.updateBranchProtection({
@@ -48,6 +49,7 @@ export const updateBranchProtection = async (
         apps: ["github-actions"],
       },
     },
+    required_linear_history: options.linearHistory,
     restrictions: null,
   });
 };
@@ -75,13 +77,16 @@ export const merge = async (
 export const getBranch = async (name: string) => {
   core.info(`Retrieving branch ${name}`);
 
-  const { data: result } = await getOctokit().repos.getBranch({
-    owner: github.context.repo.owner,
-    repo: github.context.repo.repo,
-    branch: name,
-  });
-
-  return result;
+  try {
+    const { data: result } = await getOctokit().repos.getBranch({
+      owner: github.context.repo.owner,
+      repo: github.context.repo.repo,
+      branch: name,
+    });
+    return result;
+  } catch {
+    return null;
+  }
 };
 
 export const updateBranchSha = (branch: string, sha: string) => {

@@ -19,3 +19,13 @@ export const createCommit = async (
 
   return result;
 };
+
+export const getCommit = async (sha: string) => {
+  const { data: result } = await getOctokit().git.getCommit({
+    owner: github.context.repo.owner,
+    repo: github.context.repo.repo,
+    commit_sha: sha,
+  });
+
+  return result;
+};
