@@ -10,13 +10,22 @@ import { createCommit, getCommit } from "./github-api/commit";
 import { createPullRequest, getPullRequestByCommit } from "./github-api/pr";
 
 export const updateRelease = async () => {
+  const commit = await getCommit(github.context.sha);
   const pr = await getPullRequestByCommit(github.context.sha);
+
   const choreBranchName = `chore/hotfix-merge-${pr.number}`;
 
   const devBranch = await getBranch("dev");
 
   if (!devBranch) {
     throw new Error("Dev branch not resolved");
+  }
+
+  // when creating the release PR, the push gets triggered,
+  // but at that point we should not create a dev PR as there is no commit difference
+  if (devBranch.commit.sha === commit.sha) {
+    core.info("No diff to dev, so no PR will be opened");
+    return;
   }
 
   await createBranch(choreBranchName, devBranch.commit.sha);
@@ -32,7 +41,6 @@ export const updateRelease = async () => {
     `Created branch ${choreBranchName} (sha: ${branchSha}, tree: ${branchTree})`
   );
 
-  const commit = await getCommit(github.context.sha);
   const parentSha = commit.parents[0].sha;
   const tempCommit = await createCommit(branchTree, parentSha, "temp");
 
@@ -46,12 +54,6 @@ export const updateRelease = async () => {
   const cherry = await createCommit(mergeTreeSha, branchSha, "looks good!");
 
   await updateBranchSha(choreBranchName, cherry.sha);
-
-  // when creating the release PR, the push gets triggered,
-  // but at that point we should not create a dev PR as there is no commit difference
-  if (devBranch.commit.sha === commit.sha) {
-    return;
-  }
 
   await createPullRequest(
     choreBranchName,
