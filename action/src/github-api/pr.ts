@@ -89,7 +89,9 @@ export const getPullRequestsByCommit = async (sha: string) => {
     });
 
   result.map((pr) =>
-    core.info(`Found PR <#${pr.number} ${pr.title}>\n${pr.body}`)
+    core.info(
+      `Found PR <#${pr.number} ${pr.title} from ${pr.head.ref} to ${pr.base.ref}>\n${pr.body}`
+    )
   );
 
   return result;
