@@ -8,12 +8,15 @@ import {
 import * as core from "@actions/core";
 import { createCommit, getCommit } from "./github-api/commit";
 import { createPullRequest, getPullRequestsByCommit } from "./github-api/pr";
+import { extractBranchFromRef } from "./utils/ref";
 
 export const updateRelease = async () => {
   const commit = await getCommit(github.context.sha);
   const prs = await getPullRequestsByCommit(github.context.sha);
 
-  const pr = prs.find((pr) => pr.base.ref === github.context.ref);
+  const pr = prs.find(
+    (pr) => pr.base.ref === extractBranchFromRef(github.context.ref)
+  );
 
   if (!pr) {
     throw new Error(`Could not find PR for ref ${github.context.ref}`);
