@@ -47,6 +47,12 @@ export const updateRelease = async () => {
 
   await updateBranchSha(choreBranchName, cherry.sha);
 
+  // when creating the release PR, the push gets triggered,
+  // but at that point we should not create a dev PR as there is no commit difference
+  if (devBranch.commit.sha === commit.sha) {
+    return;
+  }
+
   await createPullRequest(
     choreBranchName,
     "dev",
