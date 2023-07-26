@@ -27,7 +27,7 @@ jobs:
       - name: Create Release
         uses: ./action
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.ACTIONS_TOKEN }}
           operation: create_release
           major: ${{ github.event.inputs.major }}
           cycle: ${{ github.event.inputs.cycle }}
