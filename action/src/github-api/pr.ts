@@ -54,7 +54,7 @@ export const createPullRequest = (
   title: string,
   body: string
 ) => {
-  core.info(`Creating a hotfix to dev Pull Request`);
+  core.info(`Creating pull request <${title}> from <${from}> to <${to}>`);
 
   return getOctokit().pulls.create({
     owner: github.context.repo.owner,
@@ -67,7 +67,7 @@ export const createPullRequest = (
 };
 
 export const getPullRequestCommits = async (prNumber: number) => {
-  core.info(`Retrieving PR commits for #${prNumber}`);
+  core.info(`Retrieving PR commits for <#${prNumber}>`);
 
   const { data: result } = await getOctokit().pulls.listCommits({
     owner: github.context.repo.owner,
@@ -76,4 +76,15 @@ export const getPullRequestCommits = async (prNumber: number) => {
   });
 
   return result;
+};
+
+export const getPullRequestByCommit = async (sha: string) => {
+  const { data: result } =
+    await getOctokit().repos.listPullRequestsAssociatedWithCommit({
+      owner: github.context.repo.owner,
+      repo: github.context.repo.repo,
+      commit_sha: sha,
+    });
+
+  return result[0];
 };

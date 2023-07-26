@@ -7,16 +7,11 @@ import {
 } from "./github-api/branch";
 import * as core from "@actions/core";
 import { createCommit, getCommit } from "./github-api/commit";
-import { createPullRequest } from "./github-api/pr";
+import { createPullRequest, getPullRequestByCommit } from "./github-api/pr";
 
 export const updateRelease = async () => {
-  if (!github.context.payload.pull_request) {
-    throw new Error("There is no pull_request in the payload");
-  }
-
-  const prNumber = github.context.payload.pull_request.number;
-  // const mergeCommitSha =
-  const choreBranchName = `chore/hotfix-merge-${prNumber}`;
+  const pr = await getPullRequestByCommit(github.context.sha);
+  const choreBranchName = `chore/hotfix-merge-${pr.number}`;
 
   const devBranch = await getBranch("dev");
 
@@ -55,7 +50,7 @@ export const updateRelease = async () => {
   await createPullRequest(
     choreBranchName,
     "dev",
-    `chore(release): Merge release fix ${prNumber} to dev`,
-    commit.message
+    `chore(release): Merge release fix ${pr.number} to dev`,
+    pr.body ?? commit.message
   );
 };

@@ -1,9 +1,7 @@
 on:
-  pull_request:
+  push:
     branches:
       - release/*
-    types:
-      - closed
 
 concurrency:
   group: ${{ github.ref }}
