@@ -5,7 +5,7 @@ import {
   getLatestReleaseVersion,
   createRelease,
 } from "./github-api/release";
-import { createHotfixToDevPr, getCommits } from "./github-api/pr";
+import { createPullRequest, getPullRequestCommits } from "./github-api/pr";
 import {
   createBranch,
   getBranch,
@@ -36,13 +36,21 @@ export const createHotfixRelease = async () => {
   }
 
   const prNumber = github.context.payload.pull_request.number;
-  const commits = await getCommits(prNumber);
+  const commits = await getPullRequestCommits(prNumber);
   const devBranch = await getBranch("dev");
   const choreBranchName = `chore/hotfix-merge-${prNumber}`;
+
+  if (!devBranch) {
+    throw new Error("Dev branch not resolved");
+  }
 
   await createBranch(choreBranchName, devBranch.commit.sha);
 
   const newBranch = await getBranch(choreBranchName);
+
+  if (!newBranch) {
+    throw new Error(`Branch ${choreBranchName} not resolved`);
+  }
 
   const branchSha = newBranch.commit.sha;
   const branchTree = newBranch.commit.commit.tree.sha;
@@ -64,7 +72,12 @@ export const createHotfixRelease = async () => {
 
   await updateBranchSha(choreBranchName, cherry.sha);
 
-  await createHotfixToDevPr(choreBranchName, releaseNotes);
+  await createPullRequest(
+    choreBranchName,
+    "dev",
+    `chore(hotfix): Merge hotfix ${prNumber} to dev`,
+    releaseNotes
+  );
 };
 
 const calculateHotfixVersion = async (latestRelease: string | null) => {

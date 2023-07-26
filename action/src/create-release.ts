@@ -1,23 +1,23 @@
 import * as core from "@actions/core";
-import { getCycle, getIsMajor } from "./utils/inputs";
+import { getIsMajor } from "./utils/inputs";
+import { getLatestReleaseVersion } from "./github-api/release";
 import {
-  createRelease as createGitHubRelease,
-  generateReleaseNotes,
-  getDraftRelease,
-  getLatestReleaseVersion,
-} from "./github-api/release";
-import { createBranch, updateBranchProtection } from "./github-api/branch";
+  createBranch,
+  getBranch,
+  updateBranchProtection,
+} from "./github-api/branch";
 
 export const createRelease = async () => {
-  const existingDraft = await getDraftRelease();
-
-  if (existingDraft) {
-    throw new Error("Another draft release found, please delete it and re-run");
-  }
-
   const latestRelease = await getLatestReleaseVersion();
   const version = await calculateReleaseVersion(latestRelease);
   const branchName = `release/${version}`;
+
+  const existingReleaseBranch = await getBranch(branchName);
+
+  // idempotency if the branch was already created
+  if (existingReleaseBranch) {
+    return;
+  }
 
   await createBranch(branchName);
 
@@ -25,21 +25,9 @@ export const createRelease = async () => {
     requiredApprovals: 2,
     requireCodeOwnerReviews: true,
     lockBranch: false,
+    linearHistory: true,
+    // TODO(improve): require merge queue here once the GitHub API supports it
   });
-
-  const releaseNotes = await generateReleaseNotes(
-    version,
-    branchName,
-    latestRelease
-  );
-
-  await createGitHubRelease(
-    version,
-    branchName,
-    `Release ${version} - Cycle ${getCycle()}`,
-    releaseNotes,
-    true
-  );
 };
 
 const calculateReleaseVersion = async (latestRelease: string | null) => {
