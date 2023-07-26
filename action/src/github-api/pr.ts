@@ -79,6 +79,8 @@ export const getPullRequestCommits = async (prNumber: number) => {
 };
 
 export const getPullRequestByCommit = async (sha: string) => {
+  core.info(`Retriever PR for sha <${sha}>`);
+
   const { data: result } =
     await getOctokit().repos.listPullRequestsAssociatedWithCommit({
       owner: github.context.repo.owner,
@@ -86,5 +88,8 @@ export const getPullRequestByCommit = async (sha: string) => {
       commit_sha: sha,
     });
 
-  return result[0];
+  const pr = result[0];
+  core.info(`Found PR <#${pr.number} ${pr.title}>\n${pr.body}`);
+
+  return pr;
 };
