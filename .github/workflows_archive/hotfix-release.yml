@@ -17,7 +17,6 @@ jobs:
         with:
           node-version: '18.15.0'
       - name: Build action
-        if: ${{ !env.ACT }}
         working-directory: action
         run: yarn && yarn build
       - name: Create Hotfix Release

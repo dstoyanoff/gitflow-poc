@@ -13,6 +13,7 @@ jobs:
   update-release:
     name: Update Release
     runs-on: ubuntu-latest
+    environment: staging
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -24,5 +25,5 @@ jobs:
       - name: Update Release
         uses: ./action
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.ACTIONS_TOKEN }}
           operation: update_release
