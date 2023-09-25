@@ -25,7 +25,6 @@ export async function updateRelease() {
     `Created branch ${choreBranchName} (sha: ${branchSha}, tree: ${branchTree})`
   );
 
-  console.dir(commit.parents, { depth: null });
   const parentSha = commit.parents[0].sha;
   const tempCommit = await createCommit(branchTree, parentSha, "temp");
 
