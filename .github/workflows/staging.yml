@@ -3,6 +3,7 @@ on:
     branches:
       - 'release/*'
       - '!release/**-dev'
+      - 'hotfix/*'
 
 concurrency:
   group: staging
